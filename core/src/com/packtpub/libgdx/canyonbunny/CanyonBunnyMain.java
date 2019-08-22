@@ -10,7 +10,7 @@ import com.packtpub.libgdx.canyonbunny.game.WorldController;
 import com.packtpub.libgdx.canyonbunny.game.WorldRenderer;
 
 public class CanyonBunnyMain implements ApplicationListener {
-	private static final String TAG =CanyonBunnyMain.class.getName();
+	//private static final String TAG =CanyonBunnyMain.class.getName();
 	private WorldController worldController;
 	private WorldRenderer worldRenderer;
 	private boolean paused;
