@@ -10,6 +10,7 @@ import com.packtpub.canyonbunny.util.CharacterSkin;
 import com.packtpub.canyonbunny.util.GamePreferences;
 import com.badlogic.gdx.math.MathUtils;
 import com.packtpub.canyonbunny.util.AudioManager;
+import com.badlogic.gdx.graphics.g2d.Animation;
 
 public class BunnyHead extends AbstractGameObject {
 	public static final String TAG = BunnyHead.class.getName();
@@ -24,21 +25,30 @@ public class BunnyHead extends AbstractGameObject {
 		GROUNDED, FALLING, JUMP_RISING, JUMP_FALLING
 	}
 
-	private TextureRegion regHead;
 	public VIEW_DIRECTION viewDirection;
 	public float timeJumping;
 	public JUMP_STATE jumpState;
 	public boolean hasFeatherPowerup;
 	public float timeLeftFeatherPowerup;
 	public ParticleEffect dustParticles = new ParticleEffect();
-	
+	private Animation animNormal;
+	private Animation animCopterTransform;
+	private Animation animCopterTransformBack;
+	private Animation animCopterRotate;
+
 	public BunnyHead () {
 		init();
 	}
 
 	public void init () {
 		dimension.set(1, 1);
-		regHead = Assets.instance.bunny.head;
+		animNormal = Assets.instance.bunny.animNormal;
+		animCopterTransform = Assets.instance.bunny.animCopterTransform;
+		animCopterTransformBack =
+				Assets.instance.bunny.animCopterTransformBack;
+		animCopterRotate = Assets.instance.bunny.animCopterRotate;
+		setAnimation(animNormal);		
+		//regHead = Assets.instance.bunny.head;
 		origin.set(dimension.x / 2, dimension.y / 2);
 		bounds.set(0, 0, dimension.x, dimension.y);
 		terminalVelocity.set(3.0f, 4.0f);
@@ -49,7 +59,7 @@ public class BunnyHead extends AbstractGameObject {
 		timeJumping = 0;
 		dustParticles.load(Gdx.files.internal("particles/dust.pfx"), Gdx.files.internal("particles"));
 	}
-	
+
 	public void setFeatherPowerup (boolean pickedUp) {
 		hasFeatherPowerup = pickedUp;
 		if (pickedUp) {
@@ -64,19 +74,32 @@ public class BunnyHead extends AbstractGameObject {
 
 	@Override
 	public void render (SpriteBatch batch) {
-		TextureRegion reg = null;		
-		dustParticles.draw(batch);		
+		TextureRegion reg = null;
+		// Draw Particles
+		dustParticles.draw(batch);
+		// Apply Skin Color
 		batch.setColor(
-		CharacterSkin.values()[GamePreferences.instance.charSkin].getColor());
-		if (hasFeatherPowerup) {
-			batch.setColor(1.0f, 0.8f, 0.0f, 1.0f);
+				CharacterSkin.values()[GamePreferences.instance.charSkin]
+						.getColor());
+		float dimCorrectionX = 0;
+		float dimCorrectionY = 0;
+		if (animation != animNormal) {
+			dimCorrectionX = 0.05f;
+			dimCorrectionY = 0.2f;
 		}
-		reg = regHead;
-		batch.draw(reg.getTexture(), position.x, position.y, origin.x,
-				origin.y, dimension.x, dimension.y, scale.x, scale.y, rotation,
-				reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
-				reg.getRegionHeight(), viewDirection == VIEW_DIRECTION.LEFT,
-				false);
+		// Draw image
+		reg = animation.getKeyFrame(stateTime, true);
+		batch.draw(reg.getTexture(),
+				position.x, position.y,
+				origin.x, origin.y,
+				dimension.x + dimCorrectionX,
+				dimension.y + dimCorrectionY,
+				scale.x, scale.y,
+				rotation,
+				reg.getRegionX(), reg.getRegionY(),
+				reg.getRegionWidth(), reg.getRegionHeight(),
+				viewDirection == VIEW_DIRECTION.LEFT, false);
+		// Reset color to white
 		batch.setColor(1, 1, 1, 1);
 	}
 
@@ -89,14 +112,38 @@ public class BunnyHead extends AbstractGameObject {
 		}
 
 		if (timeLeftFeatherPowerup > 0) {
+			if (animation == animCopterTransformBack) {
+				// Restart "Transform" animation if another feather power-up
+				// was picked up during "TransformBack" animation. Otherwise,
+				// the "TransformBack" animation would be stuck while the
+				// power-up is still active.
+				setAnimation(animCopterTransform);
+			}
 			timeLeftFeatherPowerup -= deltaTime;
 			if (timeLeftFeatherPowerup < 0) {
 				timeLeftFeatherPowerup = 0;
 				setFeatherPowerup(false);
+				setAnimation(animCopterTransformBack);
 			}
 		}
 		dustParticles.update(deltaTime);
-
+		// Change animation state according to feather power-up
+		if (hasFeatherPowerup) {
+			if (animation == animNormal) {
+				setAnimation(animCopterTransform);
+			} else if (animation == animCopterTransform) {
+				if (animation.isAnimationFinished(stateTime))
+					setAnimation(animCopterRotate);
+			}
+		} else {
+			if (animation == animCopterRotate) {
+				if (animation.isAnimationFinished(stateTime))
+					setAnimation(animCopterTransformBack);
+			} else if (animation == animCopterTransformBack) {
+				if (animation.isAnimationFinished(stateTime))
+					setAnimation(animNormal);
+			}
+		}
 	}
 
 	@Override

@@ -13,6 +13,8 @@ import com.badlogic.gdx.utils.Disposable;
 import com.packtpub.canyonbunny.util.Constants;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.utils.Array;
 
 public class Assets implements Disposable, AssetErrorListener {
 	public static final String TAG = Assets.class.getName();
@@ -40,10 +42,10 @@ public class Assets implements Disposable, AssetErrorListener {
 		assetManager.load("sounds/pickup_feather.wav", Sound.class);
 		assetManager.load("sounds/live_lost.wav", Sound.class);
 		assetManager.load("music/keith303_-_brand_new_highscore.mp3",
-		Music.class);
+				Music.class);
 		assetManager.finishLoading();
 		Gdx.app.debug(TAG, "# of assets loaded: " + assetManager.getAssetNames().size);
-		
+
 		for (String a : assetManager.getAssetNames()) {
 			Gdx.app.debug(TAG, "asset: " + a);
 		}
@@ -81,10 +83,31 @@ public class Assets implements Disposable, AssetErrorListener {
 	}
 
 	public class AssetBunny {
+		public final Animation animNormal;
+		public final Animation animCopterTransform;
+		public final Animation animCopterTransformBack;
+		public final Animation animCopterRotate;		
 		public final AtlasRegion head;
 
 		public AssetBunny (TextureAtlas atlas) {
 			head = atlas.findRegion("bunny_head");
+			Array<AtlasRegion> regions = null;
+			// Animation: Bunny Normal
+			regions = atlas.findRegions("anim_bunny_normal");
+			animNormal = new Animation(1.0f / 10.0f, regions,
+					Animation.PlayMode.LOOP_PINGPONG);
+			// Animation: Bunny Copter - knot ears
+			regions = atlas.findRegions("anim_bunny_copter");
+			animCopterTransform = new Animation(1.0f / 10.0f, regions);
+			// Animation: Bunny Copter - unknot ears
+			regions = atlas.findRegions("anim_bunny_copter");
+			animCopterTransformBack = new Animation(1.0f / 10.0f, regions,
+					Animation.PlayMode.REVERSED);
+			// Animation: Bunny Copter - rotate ears
+			regions = new Array<AtlasRegion>();
+			regions.add(atlas.findRegion("anim_bunny_copter", 4));
+			regions.add(atlas.findRegion("anim_bunny_copter", 5));
+			animCopterRotate = new Animation(1.0f / 15.0f, regions);
 		}
 	}
 
@@ -99,10 +122,18 @@ public class Assets implements Disposable, AssetErrorListener {
 	}
 
 	public class AssetGoldCoin {
+		public final Animation animGoldCoin;
 		public final AtlasRegion goldCoin;
 
 		public AssetGoldCoin (TextureAtlas atlas) {
 			goldCoin = atlas.findRegion("item_gold_coin");
+			// Animation: Gold Coin
+			Array<AtlasRegion> regions =
+					atlas.findRegions("anim_gold_coin");
+			AtlasRegion region = regions.first();
+			for (int i = 0; i < 10; i++)
+				regions.insert(0, region);
+			animGoldCoin = new Animation(1.0f / 20.0f, regions,	Animation.PlayMode.LOOP_PINGPONG);
 		}
 	}
 
@@ -123,7 +154,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		public final AtlasRegion waterOverlay;
 		public final AtlasRegion carrot;
 		public final AtlasRegion goal;
-		
+
 		public AssetLevelDecoration (TextureAtlas atlas) {
 			cloud01 = atlas.findRegion("cloud01");
 			cloud02 = atlas.findRegion("cloud02");
@@ -165,7 +196,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		public final Sound pickupCoin;
 		public final Sound pickupFeather;
 		public final Sound liveLost;
-		
+
 		public AssetSounds (AssetManager am) {
 			jump = am.get("sounds/jump.wav", Sound.class);
 			jumpWithFeather = am.get("sounds/jump_with_feather.wav",
@@ -176,10 +207,10 @@ public class Assets implements Disposable, AssetErrorListener {
 			liveLost = am.get("sounds/live_lost.wav", Sound.class);
 		}
 	}
-	
+
 	public class AssetMusic {
 		public final Music song01;
-		
+
 		public AssetMusic (AssetManager am) {
 			song01 = am.get("music/keith303_-_brand_new_highscore.mp3",
 					Music.class);

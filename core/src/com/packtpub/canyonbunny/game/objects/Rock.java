@@ -3,7 +3,6 @@ package com.packtpub.canyonbunny.game.objects;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.packtpub.canyonbunny.game.Assets;
 
 public class Rock extends AbstractGameObject {
@@ -14,7 +13,6 @@ public class Rock extends AbstractGameObject {
 	private final float FLOAT_AMPLITUDE = 0.25f;
 	private float floatCycleTimeLeft;
 	private boolean floatingDownwards;
-	private Vector2 floatTargetPosition;
 
 	public Rock () {
 		init();
@@ -28,7 +26,6 @@ public class Rock extends AbstractGameObject {
 		floatingDownwards = false;
 		floatCycleTimeLeft = MathUtils.random(0,
 				FLOAT_CYCLE_TIME / 2);
-		floatTargetPosition = null;
 	}
 
 	public void setLength (int length) {

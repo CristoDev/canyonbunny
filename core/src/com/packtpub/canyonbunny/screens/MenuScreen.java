@@ -1,6 +1,5 @@
 package com.packtpub.canyonbunny.screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Color;
@@ -29,9 +28,12 @@ import com.packtpub.canyonbunny.util.CharacterSkin;
 import com.packtpub.canyonbunny.util.GamePreferences;
 import com.packtpub.canyonbunny.screens.transitions.ScreenTransition;
 import com.packtpub.canyonbunny.screens.transitions.ScreenTransitionFade;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
 public class MenuScreen extends AbstractGameScreen {
-	private static final String TAG = MenuScreen.class.getName();
 	private Stage stage;
 	private Skin skinCanyonBunny;
 	private Skin skinLibgdx;
@@ -131,7 +133,6 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildBackgroundLayer () {
 		Table layer = new Table();
-		// + Background
 		imgBackground = new Image(skinCanyonBunny, "background");
 		layer.add(imgBackground);
 		return layer;
@@ -139,14 +140,26 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildObjectsLayer () {
 		Table layer = new Table();
-		// + Coins
 		imgCoins = new Image(skinCanyonBunny, "coins");
 		layer.addActor(imgCoins);
-		imgCoins.setPosition(135, 80);
-		// + Bunny
+		imgCoins.setOrigin(imgCoins.getWidth() / 2,
+				imgCoins.getHeight() / 2);
+		imgCoins.addAction(sequence(
+				moveTo(135, -20),
+				scaleTo(0, 0),
+				fadeOut(0),
+				delay(2.5f),
+				parallel(moveBy(0, 100, 0.5f, Interpolation.swingOut),
+						scaleTo(1.0f, 1.0f, 0.25f, Interpolation.linear),
+						alpha(1.0f, 0.5f))));
 		imgBunny = new Image(skinCanyonBunny, "bunny");
 		layer.addActor(imgBunny);
-		imgBunny.setPosition(355, 40);
+		imgBunny.addAction(sequence(
+				moveTo(655, 510),
+				delay(4.0f),
+				moveBy(-70, -100, 0.5f, Interpolation.fade),
+				moveBy(-100, -50, 0.5f, Interpolation.fade),
+				moveBy(-150, -300, 1.0f, Interpolation.elasticIn)));
 		return layer;
 	}
 
@@ -193,9 +206,8 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private void onOptionsClicked() {
 		loadSettings();
-		btnMenuPlay.setVisible(false);
-		btnMenuOptions.setVisible(false);
-		winOptions.setVisible(true);
+		showMenuButtons(false);
+		showOptionsWindow(true, true);
 	}
 
 	private Table buildOptionsWindowLayer () {
@@ -205,8 +217,9 @@ public class MenuScreen extends AbstractGameScreen {
 		winOptions.add(buildOptWinDebug()).row();
 		winOptions.add(buildOptWinButtons()).pad(10, 0, 10, 0);
 		winOptions.setColor(1, 1, 1, 0.8f);
-		winOptions.setVisible(false);
-		if (debugEnabled) winOptions.debug();
+		showOptionsWindow(false, false);
+		if (debugEnabled) 
+			winOptions.debug();
 		winOptions.pack();
 		winOptions.setPosition
 		(Constants.VIEWPORT_GUI_WIDTH - winOptions.getWidth() - 50,
@@ -247,14 +260,11 @@ public class MenuScreen extends AbstractGameScreen {
 	private void onSaveClicked() {
 		saveSettings();
 		onCancelClicked();
-		AudioManager.instance.onSettingsUpdated();
-
 	}
 
 	private void onCancelClicked() {
-		btnMenuPlay.setVisible(true);
-		btnMenuOptions.setVisible(true);
-		winOptions.setVisible(false);
+		showMenuButtons(true);
+		showOptionsWindow(false, true);
 		AudioManager.instance.onSettingsUpdated();
 	}
 
@@ -315,7 +325,7 @@ public class MenuScreen extends AbstractGameScreen {
 		chkShowFpsCounter = new CheckBox("", skinLibgdx);
 		tbl.add(new Label("Show FPS Counter", skinLibgdx));
 		tbl.add(chkShowFpsCounter);
-		
+
 		// + Checkbox, "Use Monochrome Shader" label
 		chkUseMonochromeShader = new CheckBox("", skinLibgdx);
 		tbl.add(new Label("Use Monochrome Shader", skinLibgdx));
@@ -359,5 +369,40 @@ public class MenuScreen extends AbstractGameScreen {
 		});
 
 		return tbl;
+	}
+
+	private void showMenuButtons (boolean visible) {
+		float moveDuration = 1.0f;
+		Interpolation moveEasing = Interpolation.swing;
+		float delayOptionsButton = 0.25f;
+		float moveX = 300 * (visible ? -1 : 1);
+		float moveY = 0 * (visible ? -1 : 1);
+		final Touchable touchEnabled = visible ? Touchable.enabled
+				: Touchable.disabled;
+		btnMenuPlay.addAction(
+				moveBy(moveX, moveY, moveDuration, moveEasing));
+		btnMenuOptions.addAction(sequence(
+				delay(delayOptionsButton),
+				moveBy(moveX, moveY, moveDuration, moveEasing)));
+		SequenceAction seq = sequence();
+		if (visible)
+			seq.addAction(delay(delayOptionsButton + moveDuration));
+		seq.addAction(run(new Runnable() {
+			public void run () {
+				btnMenuPlay.setTouchable(touchEnabled);
+				btnMenuOptions.setTouchable(touchEnabled);
+			}
+		}));
+		stage.addAction(seq);
+	}
+
+	private void showOptionsWindow (boolean visible, boolean animated) {
+		float alphaTo = visible ? 0.8f : 0.0f;
+		float duration = animated ? 1.0f : 0.0f;
+		Touchable touchEnabled = visible ? Touchable.enabled
+				: Touchable.disabled;
+		winOptions.addAction(sequence(
+				touchable(touchEnabled),
+				alpha(alphaTo, duration)));
 	}
 }
