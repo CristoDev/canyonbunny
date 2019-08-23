@@ -16,6 +16,10 @@ import com.packtpub.canyonbunny.game.objects.Feather;
 import com.packtpub.canyonbunny.game.objects.GoldCoin;
 import com.packtpub.canyonbunny.game.objects.Rock;
 import com.packtpub.canyonbunny.screens.MenuScreen;
+import com.packtpub.canyonbunny.screens.DirectedGame;
+import com.badlogic.gdx.math.Interpolation;
+import com.packtpub.canyonbunny.screens.transitions.ScreenTransition;
+import com.packtpub.canyonbunny.screens.transitions.ScreenTransitionSlide;
 
 public class WorldController extends InputAdapter {
 	private static final String TAG =CanyonBunnyMain.class.getName();
@@ -31,24 +35,25 @@ public class WorldController extends InputAdapter {
 	public float livesVisual;
 	public float scoreVisual;
 
-	private Game game;	
+	private DirectedGame game;
+
+	public WorldController (DirectedGame game) {
+		this.game = game;
+		init();
+	}
 
 	public WorldController () {
 		init();
 	}
 
-	public WorldController (Game game) {
-		this.game = game;
-		init();
-	}	
-
 	private void backToMenu () {
 		// switch to menu screen
-		game.setScreen(new MenuScreen(game));
+		ScreenTransition transition = ScreenTransitionSlide.init(0.75f,ScreenTransitionSlide.DOWN, 
+				false, Interpolation.bounceOut);
+		game.setScreen(new MenuScreen(game), transition);
 	}
 
 	private void init () {
-		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
 		lives = Constants.LIVES_START;
 		livesVisual = lives;
