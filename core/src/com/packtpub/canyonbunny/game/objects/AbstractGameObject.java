@@ -50,17 +50,13 @@ public abstract class AbstractGameObject {
 						Math.min(velocity.x + friction.x * deltaTime, 0);
 			}
 		}
-		// Apply acceleration
 		velocity.x += acceleration.x * deltaTime;
-		// Make sure the object's velocity does not exceed the
-		// positive or negative terminal velocity
 		velocity.x = MathUtils.clamp(velocity.x,
 				-terminalVelocity.x, terminalVelocity.x);
 	}
 
 	protected void updateMotionY (float deltaTime) {
 		if (velocity.y != 0) {
-			// Apply friction
 			if (velocity.y > 0) {
 				velocity.y = Math.max(velocity.y - friction.y *
 						deltaTime, 0);
@@ -69,10 +65,7 @@ public abstract class AbstractGameObject {
 						deltaTime, 0);
 			}
 		}
-		// Apply acceleration
 		velocity.y += acceleration.y * deltaTime;
-		// Make sure the object's velocity does not exceed the
-		// positive or negative terminal velocity
 		velocity.y = MathUtils.clamp(velocity.y, -
 				terminalVelocity.y, terminalVelocity.y);
 	}

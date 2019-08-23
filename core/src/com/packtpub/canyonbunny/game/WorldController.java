@@ -1,35 +1,48 @@
 package com.packtpub.canyonbunny.game;
 
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.packtpub.canyonbunny.CanyonBunnyMain;
-import com.packtpub.canyonbunny.game.objects.BunnyHead;
-import com.packtpub.canyonbunny.game.objects.Feather;
-import com.packtpub.canyonbunny.game.objects.GoldCoin;
-import com.packtpub.canyonbunny.game.objects.Rock;
 import com.packtpub.canyonbunny.util.CameraHelper;
 import com.packtpub.canyonbunny.util.Constants;
 import com.badlogic.gdx.math.Rectangle;
+import com.packtpub.canyonbunny.game.objects.BunnyHead;
+import com.packtpub.canyonbunny.game.objects.BunnyHead.JUMP_STATE;
+import com.packtpub.canyonbunny.game.objects.Feather;
+import com.packtpub.canyonbunny.game.objects.GoldCoin;
+import com.packtpub.canyonbunny.game.objects.Rock;
+import com.packtpub.canyonbunny.screens.MenuScreen;
 
 public class WorldController extends InputAdapter {
-	private static final String TAG = CanyonBunnyMain.class.getName();
+	private static final String TAG =CanyonBunnyMain.class.getName();
 	public Sprite[] testSprites;
 	public int selectedSprite;
 	public CameraHelper cameraHelper;
 	public Level level;
 	public int lives;
 	public int score;
-	
-	// Rectangles for collision detection
 	private Rectangle collisionRectangle1 = new Rectangle();
 	private Rectangle collisionRectangle2 = new Rectangle();
 	private float timeLeftGameOverDelay;
 
+	private Game game;	
+
 	public WorldController () {
 		init();
+	}
+
+	public WorldController (Game game) {
+		this.game = game;
+		init();
+	}	
+	
+	private void backToMenu () {
+		// switch to menu screen
+		game.setScreen(new MenuScreen(game));
 	}
 
 	private void init () {
@@ -45,19 +58,15 @@ public class WorldController extends InputAdapter {
 		level = new Level(Constants.LEVEL_01);
 		cameraHelper.setTarget(level.bunnyHead);
 	}
-
+	
 	public void update (float deltaTime) {
 		handleDebugInput(deltaTime);
-
 		if (isGameOver()) {
 			timeLeftGameOverDelay -= deltaTime;
-			if (timeLeftGameOverDelay < 0) {
-				init();
-			}				
+			if (timeLeftGameOverDelay < 0) backToMenu();
 		} else {
 			handleInputGame(deltaTime);
 		}
-
 		level.update(deltaTime);
 		testCollisions();
 		cameraHelper.update(deltaTime);
@@ -116,17 +125,19 @@ public class WorldController extends InputAdapter {
 			init();
 			Gdx.app.debug(TAG, "Game world resetted");
 		}
-		// Toggle camera follow
 		else if (keycode == Keys.ENTER) {
 			cameraHelper.setTarget(cameraHelper.hasTarget()	? null: level.bunnyHead);
 			Gdx.app.debug(TAG, "Camera follow enabled: " + cameraHelper.hasTarget());
+		}
+		// Back to Menu
+		else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
+		backToMenu();
 		}
 		return false;
 	}
 
 	private void handleInputGame (float deltaTime) {
 		if (cameraHelper.hasTarget(level.bunnyHead)) {
-			// Player Movement
 			if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 				level.bunnyHead.velocity.x =
 						-level.bunnyHead.terminalVelocity.x;
@@ -134,13 +145,11 @@ public class WorldController extends InputAdapter {
 				level.bunnyHead.velocity.x =
 						level.bunnyHead.terminalVelocity.x;
 			} else {
-				// Execute auto-forward movement on non-desktop platform
 				if (Gdx.app.getType() != ApplicationType.Desktop) {
 					level.bunnyHead.velocity.x =
 							level.bunnyHead.terminalVelocity.x;
 				}
 			}
-			// Bunny Jump
 			if (Gdx.input.isTouched() ||
 					Gdx.input.isKeyPressed(Keys.SPACE)) {
 				level.bunnyHead.setJumping(true);
@@ -153,16 +162,12 @@ public class WorldController extends InputAdapter {
 	private void testCollisions () {
 		collisionRectangle1.set(level.bunnyHead.position.x, level.bunnyHead.position.y,
 				level.bunnyHead.bounds.width, level.bunnyHead.bounds.height);
-		// Test collision: Bunny Head <-> Rocks
 		for (Rock rock : level.rocks) {
 			collisionRectangle2.set(rock.position.x, rock.position.y, rock.bounds.width,
 					rock.bounds.height);
 			if (!collisionRectangle1.overlaps(collisionRectangle2)) continue;
 			onCollisionBunnyHeadWithRock(rock);
-			// IMPORTANT: must do all collisions for valid
-			// edge testing on rocks.
 		}
-		// Test collision: Bunny Head <-> Gold Coins
 		for (GoldCoin goldcoin : level.goldcoins) {
 			if (goldcoin.collected) continue;
 			collisionRectangle2.set(goldcoin.position.x, goldcoin.position.y,
@@ -171,7 +176,6 @@ public class WorldController extends InputAdapter {
 			onCollisionBunnyWithGoldCoin(goldcoin);
 			break;
 		}
-		// Test collision: Bunny Head <-> Feathers
 		for (Feather feather : level.feathers) {
 			if (feather.collected) continue;
 			collisionRectangle2.set(feather.position.x, feather.position.y,
@@ -204,7 +208,7 @@ public class WorldController extends InputAdapter {
 		case JUMP_FALLING:
 			bunnyHead.position.y = rock.position.y +
 			bunnyHead.bounds.height + bunnyHead.origin.y;
-			bunnyHead.jumpState = BunnyHead.JUMP_STATE.GROUNDED;
+			bunnyHead.jumpState = JUMP_STATE.GROUNDED;
 			break;
 		case JUMP_RISING:
 			bunnyHead.position.y = rock.position.y +

@@ -2,8 +2,10 @@ package com.packtpub.canyonbunny.game.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.packtpub.canyonbunny.util.Constants;
 import com.packtpub.canyonbunny.game.Assets;
+import com.packtpub.canyonbunny.util.Constants;
+import com.packtpub.canyonbunny.util.CharacterSkin;
+import com.packtpub.canyonbunny.util.GamePreferences;
 
 public class BunnyHead extends AbstractGameObject {
 	public static final String TAG = BunnyHead.class.getName();
@@ -32,20 +34,14 @@ public class BunnyHead extends AbstractGameObject {
 	public void init () {
 		dimension.set(1, 1);
 		regHead = Assets.instance.bunny.head;
-		// Center image on game object
 		origin.set(dimension.x / 2, dimension.y / 2);
-		// Bounding box for collision detection
 		bounds.set(0, 0, dimension.x, dimension.y);
-		// Set physics values
 		terminalVelocity.set(3.0f, 4.0f);
 		friction.set(12.0f, 0.0f);
 		acceleration.set(0.0f, -25.0f);
-		// View direction
 		viewDirection = VIEW_DIRECTION.RIGHT;
-		// Jump state
 		jumpState = JUMP_STATE.FALLING;
 		timeJumping = 0;
-		// Power-ups
 		hasFeatherPowerup = false;
 		timeLeftFeatherPowerup = 0;
 	}
@@ -65,18 +61,18 @@ public class BunnyHead extends AbstractGameObject {
 	@Override
 	public void render (SpriteBatch batch) {
 		TextureRegion reg = null;
-		// Set special color when game object has a feather power-up
+		// Apply Skin Color
+		batch.setColor(
+		CharacterSkin.values()[GamePreferences.instance.charSkin].getColor());
 		if (hasFeatherPowerup) {
 			batch.setColor(1.0f, 0.8f, 0.0f, 1.0f);
 		}
-		// Draw image
 		reg = regHead;
 		batch.draw(reg.getTexture(), position.x, position.y, origin.x,
 				origin.y, dimension.x, dimension.y, scale.x, scale.y, rotation,
 				reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
 				reg.getRegionHeight(), viewDirection == VIEW_DIRECTION.LEFT,
 				false);
-		// Reset color to white
 		batch.setColor(1, 1, 1, 1);
 	}
 
@@ -91,7 +87,6 @@ public class BunnyHead extends AbstractGameObject {
 		if (timeLeftFeatherPowerup > 0) {
 			timeLeftFeatherPowerup -= deltaTime;
 			if (timeLeftFeatherPowerup < 0) {
-				// disable power-up
 				timeLeftFeatherPowerup = 0;
 				setFeatherPowerup(false);
 			}
@@ -105,22 +100,16 @@ public class BunnyHead extends AbstractGameObject {
 			jumpState = JUMP_STATE.FALLING;
 			break;
 		case JUMP_RISING:
-			// Keep track of jump time
 			timeJumping += deltaTime;
-			// Jump time left?
 			if (timeJumping <= JUMP_TIME_MAX) {
-				// Still jumping
 				velocity.y = terminalVelocity.y;
 			}
 			break;
 		case FALLING:
 			break;
 		case JUMP_FALLING:
-			// Add delta times to track jump time
 			timeJumping += deltaTime;
-			// Jump to minimal height if jump key was pressed too short
 			if (timeJumping > 0 && timeJumping <= JUMP_TIME_MIN) {
-				// Still jumping
 				velocity.y = terminalVelocity.y;
 			}
 		}
@@ -134,7 +123,6 @@ public class BunnyHead extends AbstractGameObject {
 		switch (jumpState) {
 		case GROUNDED: // Character is standing on a platform
 			if (jumpKeyPressed) {
-				// Start counting jump time from the beginning
 				timeJumping = 0;
 				jumpState = JUMP_STATE.JUMP_RISING;
 			}

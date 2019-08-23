@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
-
+import com.packtpub.canyonbunny.util.GamePreferences;
 import com.packtpub.canyonbunny.util.Constants;
 
 public class WorldRenderer implements Disposable {
@@ -70,7 +70,8 @@ public class WorldRenderer implements Disposable {
 		// draw collected feather icon (anchored to top left edge)
 		renderGuiFeatherPowerup(batch);		
 		renderGuiExtraLive(batch);
-		renderGuiFpsCounter(batch);
+		if (GamePreferences.instance.showFpsCounter)
+			renderGuiFpsCounter(batch);
 		// draw game over text
 		renderGuiGameOverMessage(batch);		
 		batch.end();
