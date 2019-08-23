@@ -41,7 +41,6 @@ public abstract class AbstractGameObject {
 
 	protected void updateMotionX (float deltaTime) {
 		if (velocity.x != 0) {
-			// Apply friction
 			if (velocity.x > 0) {
 				velocity.x =
 						Math.max(velocity.x - friction.x * deltaTime, 0);

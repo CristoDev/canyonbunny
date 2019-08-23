@@ -2,6 +2,8 @@ package com.packtpub.canyonbunny.game.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.packtpub.canyonbunny.game.Assets;
 import com.packtpub.canyonbunny.util.Constants;
 import com.packtpub.canyonbunny.util.CharacterSkin;
@@ -26,7 +28,8 @@ public class BunnyHead extends AbstractGameObject {
 	public JUMP_STATE jumpState;
 	public boolean hasFeatherPowerup;
 	public float timeLeftFeatherPowerup;
-
+	public ParticleEffect dustParticles = new ParticleEffect();
+	
 	public BunnyHead () {
 		init();
 	}
@@ -42,8 +45,8 @@ public class BunnyHead extends AbstractGameObject {
 		viewDirection = VIEW_DIRECTION.RIGHT;
 		jumpState = JUMP_STATE.FALLING;
 		timeJumping = 0;
-		hasFeatherPowerup = false;
-		timeLeftFeatherPowerup = 0;
+		// Particles
+		dustParticles.load(Gdx.files.internal("particles/dust.pfx"), Gdx.files.internal("particles"));
 	}
 	
 	public void setFeatherPowerup (boolean pickedUp) {
@@ -60,8 +63,9 @@ public class BunnyHead extends AbstractGameObject {
 
 	@Override
 	public void render (SpriteBatch batch) {
-		TextureRegion reg = null;
-		// Apply Skin Color
+		TextureRegion reg = null;		
+		// Draw Particles
+		dustParticles.draw(batch);		
 		batch.setColor(
 		CharacterSkin.values()[GamePreferences.instance.charSkin].getColor());
 		if (hasFeatherPowerup) {
@@ -91,6 +95,8 @@ public class BunnyHead extends AbstractGameObject {
 				setFeatherPowerup(false);
 			}
 		}
+		dustParticles.update(deltaTime);
+
 	}
 
 	@Override
@@ -98,6 +104,10 @@ public class BunnyHead extends AbstractGameObject {
 		switch (jumpState) {
 		case GROUNDED:
 			jumpState = JUMP_STATE.FALLING;
+			if (velocity.x != 0) {
+				dustParticles.setPosition(position.x + dimension.x / 2, position.y);
+				dustParticles.start();
+			}			
 			break;
 		case JUMP_RISING:
 			timeJumping += deltaTime;
@@ -115,24 +125,25 @@ public class BunnyHead extends AbstractGameObject {
 		}
 
 		if (jumpState != JUMP_STATE.GROUNDED) {
+			dustParticles.allowCompletion();
 			super.updateMotionY(deltaTime);
 		}
 	}	
 
 	public void setJumping (boolean jumpKeyPressed) {
 		switch (jumpState) {
-		case GROUNDED: // Character is standing on a platform
+		case GROUNDED:
 			if (jumpKeyPressed) {
 				timeJumping = 0;
 				jumpState = JUMP_STATE.JUMP_RISING;
 			}
 			break;
-		case JUMP_RISING: // Rising in the air
+		case JUMP_RISING:
 			if (!jumpKeyPressed)
 				jumpState = JUMP_STATE.JUMP_FALLING;
 			break;
-		case FALLING:// Falling down
-		case JUMP_FALLING: // Falling down after jump		
+		case FALLING:
+		case JUMP_FALLING:		
 			if (jumpKeyPressed && hasFeatherPowerup) {
 				timeJumping = JUMP_TIME_OFFSET_FLYING;
 				jumpState = JUMP_STATE.JUMP_RISING;

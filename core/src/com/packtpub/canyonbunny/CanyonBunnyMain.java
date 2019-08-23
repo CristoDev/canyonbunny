@@ -11,11 +11,8 @@ import com.packtpub.canyonbunny.screens.MenuScreen;
 public class CanyonBunnyMain extends Game {
 	@Override
 	public void create () {
-		// Set Libgdx log level
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-		// Load assets
 		Assets.instance.init(new AssetManager());
-		// Start game at menu screen
 		setScreen(new MenuScreen(this));
 	}
 }

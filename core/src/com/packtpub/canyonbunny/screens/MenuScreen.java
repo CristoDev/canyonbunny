@@ -73,12 +73,11 @@ public class MenuScreen extends AbstractGameScreen {
 		stage.act(deltaTime);
 		stage.draw();
 		stage.setDebugAll(true);
-		// remplace:
-		//Table.drawDebug(stage);
 	}
 
 	@Override
 	public void resize(int width, int height) {
+		// TODO Auto-generated method stub
 		stage.getViewport().update(width, height, true);
 	}
 
@@ -99,6 +98,8 @@ public class MenuScreen extends AbstractGameScreen {
 
 	@Override
 	public void pause() {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void rebuildStage () {

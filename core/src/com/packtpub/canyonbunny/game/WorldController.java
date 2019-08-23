@@ -28,6 +28,8 @@ public class WorldController extends InputAdapter {
 	private Rectangle collisionRectangle1 = new Rectangle();
 	private Rectangle collisionRectangle2 = new Rectangle();
 	private float timeLeftGameOverDelay;
+	public float livesVisual;
+	public float scoreVisual;
 
 	private Game game;	
 
@@ -39,7 +41,7 @@ public class WorldController extends InputAdapter {
 		this.game = game;
 		init();
 	}	
-	
+
 	private void backToMenu () {
 		// switch to menu screen
 		game.setScreen(new MenuScreen(game));
@@ -49,34 +51,41 @@ public class WorldController extends InputAdapter {
 		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
 		lives = Constants.LIVES_START;
+		livesVisual = lives;
 		timeLeftGameOverDelay = 0;
-		initLevel();	
+		initLevel();
 	}
 
 	private void initLevel () {
 		score = 0;
+		scoreVisual = score;
 		level = new Level(Constants.LEVEL_01);
 		cameraHelper.setTarget(level.bunnyHead);
 	}
-	
+
 	public void update (float deltaTime) {
 		handleDebugInput(deltaTime);
 		if (isGameOver()) {
 			timeLeftGameOverDelay -= deltaTime;
-			if (timeLeftGameOverDelay < 0) backToMenu();
+			if (timeLeftGameOverDelay< 0) backToMenu();
 		} else {
 			handleInputGame(deltaTime);
 		}
 		level.update(deltaTime);
 		testCollisions();
 		cameraHelper.update(deltaTime);
-		if (!isGameOver() && isPlayerInWater()) {
+		if (!isGameOver() &&isPlayerInWater()) {
 			lives--;
 			if (isGameOver())
 				timeLeftGameOverDelay = Constants.TIME_DELAY_GAME_OVER;
 			else
 				initLevel();
-		}			
+		}
+		level.mountains.updateScrollPosition(cameraHelper.getPosition());
+		if (livesVisual> lives)
+			livesVisual = Math.max(lives, livesVisual - 1 * deltaTime);
+		if (scoreVisual< score)
+			scoreVisual = Math.min(score, scoreVisual + 250 * deltaTime);
 	}
 
 	private void handleDebugInput (float deltaTime) {
@@ -131,7 +140,7 @@ public class WorldController extends InputAdapter {
 		}
 		// Back to Menu
 		else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
-		backToMenu();
+			backToMenu();
 		}
 		return false;
 	}
