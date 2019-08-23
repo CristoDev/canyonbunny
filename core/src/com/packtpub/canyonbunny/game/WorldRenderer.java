@@ -8,42 +8,82 @@ import com.badlogic.gdx.utils.Disposable;
 import com.packtpub.canyonbunny.util.GamePreferences;
 import com.packtpub.canyonbunny.util.Constants;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class WorldRenderer implements Disposable {
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
 	private WorldController worldController;
 	private OrthographicCamera cameraGUI;
+	private static final boolean DEBUG_DRAW_BOX2D_WORLD = false;
+	private Box2DDebugRenderer b2debugRenderer;
+	private ShaderProgram shaderMonochrome;
+	public float x=0, delta=0.01f;
+	
 
 	public WorldRenderer (WorldController worldController) {
 		this.worldController = worldController;
 		init();
 	}
+
 	private void init () {
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera(Constants.VIEWPORT_WIDTH,
 				Constants.VIEWPORT_HEIGHT);
 		camera.position.set(0, 0, 0);
 		camera.update();
-
 		cameraGUI = new OrthographicCamera(Constants.VIEWPORT_GUI_WIDTH,
 				Constants.VIEWPORT_GUI_HEIGHT);
 		cameraGUI.position.set(0, 0, 0);
-		cameraGUI.setToOrtho(true); // flip y-axis
+		cameraGUI.setToOrtho(true);
+		// flip y-axis
 		cameraGUI.update();
-	}
+		b2debugRenderer = new Box2DDebugRenderer();
 
-	public void render () {
-		renderWorld(batch);
-		renderGui(batch);
+		shaderMonochrome = new ShaderProgram(
+				Gdx.files.internal(Constants.shaderMonochromeVertex),
+				Gdx.files.internal(Constants.shaderMonochromeFragment));
+		if (!shaderMonochrome.isCompiled()) {
+			String msg = "Could not compile shader program: "
+					+ shaderMonochrome.getLog();
+			throw new GdxRuntimeException(msg);
+		}
 	}
 
 	private void renderWorld (SpriteBatch batch) {
 		worldController.cameraHelper.applyTo(camera);
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
+		if (GamePreferences.instance.useMonochromeShader) {
+			batch.setShader(shaderMonochrome);
+			/*if (x > 5)  {
+				x=5;
+				delta=-delta;
+			}
+			else if (x < 0) {
+				x=0;
+				delta=Math.abs(delta);
+			}
+			x+=delta;
+			*/
+			x=1.0f;
+			shaderMonochrome.setUniformf("u_amount", x);
+		}
 		worldController.level.render(batch);
+		batch.setShader(null);
 		batch.end();
+		
+		if (DEBUG_DRAW_BOX2D_WORLD) {
+			b2debugRenderer.render(worldController.b2world,
+					camera.combined);
+		}
+	}
+
+	public void render () {
+		renderWorld(batch);
+		renderGui(batch);
 	}
 
 	public void resize (int width, int height) {
@@ -62,6 +102,7 @@ public class WorldRenderer implements Disposable {
 	@Override
 	public void dispose () {
 		batch.dispose();
+		shaderMonochrome.dispose();
 	}
 
 	private void renderGui (SpriteBatch batch) {
