@@ -156,9 +156,6 @@ public class WorldRenderer implements Disposable {
 		float timeLeftFeatherPowerup =
 				worldController.level.bunnyHead.timeLeftFeatherPowerup;
 		if (timeLeftFeatherPowerup > 0) {
-			// Start icon fade in/out if the left power-up time
-			// is less than 4 seconds. The fade interval is set
-			// to 5 changes per second.
 			if (timeLeftFeatherPowerup < 4) {
 				if (((int)(timeLeftFeatherPowerup * 5) % 2) != 0) {
 					batch.setColor(1, 1, 1, 0.5f);

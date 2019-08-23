@@ -31,7 +31,6 @@ public abstract class DirectedGame implements ApplicationListener {
 			batch = new SpriteBatch();
 			init = true;
 		}
-		// start new transition
 		nextScreen = screen;
 		nextScreen.show(); // activate next screen
 		nextScreen.resize(w, h);
@@ -50,33 +49,25 @@ public abstract class DirectedGame implements ApplicationListener {
 
 	@Override
 	public void render () {
-		// get delta time and ensure an upper limit of one 60th second
 		float deltaTime = Math.min(Gdx.graphics.getDeltaTime(),
 				1.0f / 60.0f);
 		if (nextScreen == null) {
-			// no ongoing transition
 			if (currScreen != null) 
 				currScreen.render(deltaTime);
 		} else {
-			// ongoing transition
 			float duration = 0;
 			if (screenTransition != null)
 				duration = screenTransition.getDuration();
-			// update progress of ongoing transition
 			t = Math.min(t + deltaTime, duration);
 			if (screenTransition == null || t >= duration) {
-				//no transition effect set or transition has just finished
 				if (currScreen != null) 
 					currScreen.hide();
 				nextScreen.resume();
-				// enable input for next screen
 				Gdx.input.setInputProcessor(nextScreen.getInputProcessor());
-				// switch screens
 				currScreen = nextScreen;
 				nextScreen = null;
 				screenTransition = null;
 			} else {
-				// render screens to FBOs
 				currFbo.begin();
 				if (currScreen != null) 
 					currScreen.render(deltaTime);
@@ -84,7 +75,6 @@ public abstract class DirectedGame implements ApplicationListener {
 				nextFbo.begin();
 				nextScreen.render(deltaTime);
 				nextFbo.end();
-				// render transition effect to screen
 				float alpha = t / duration;
 				screenTransition.render(batch,
 						currFbo.getColorBufferTexture(), nextFbo.getColorBufferTexture(),

@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.InputProcessor;
 import com.packtpub.canyonbunny.game.Assets;
 import com.packtpub.canyonbunny.util.Constants;
+import com.packtpub.canyonbunny.util.AudioManager;
 import com.packtpub.canyonbunny.util.CharacterSkin;
 import com.packtpub.canyonbunny.util.GamePreferences;
 import com.packtpub.canyonbunny.screens.transitions.ScreenTransition;
@@ -34,7 +35,6 @@ public class MenuScreen extends AbstractGameScreen {
 	private Stage stage;
 	private Skin skinCanyonBunny;
 	private Skin skinLibgdx;
-	// menu
 	private Image imgBackground;
 	private Image imgLogo;
 	private Image imgInfo;
@@ -42,7 +42,6 @@ public class MenuScreen extends AbstractGameScreen {
 	private Image imgBunny;
 	private Button btnMenuPlay;
 	private Button btnMenuOptions;
-	// options
 	private Window winOptions;
 	private TextButton btnWinOptSave;
 	private TextButton btnWinOptCancel;
@@ -53,7 +52,6 @@ public class MenuScreen extends AbstractGameScreen {
 	private SelectBox<CharacterSkin> selCharSkin;
 	private Image imgCharSkin;
 	private CheckBox chkShowFpsCounter;
-	// debug
 	private final float DEBUG_REBUILD_INTERVAL = 5.0f;
 	private boolean debugEnabled = true;
 	private float debugRebuildStage;	
@@ -75,12 +73,10 @@ public class MenuScreen extends AbstractGameScreen {
 		}		
 		stage.act(deltaTime);
 		stage.draw();
-		//stage.setDebugAll(true);
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
 		stage.getViewport().update(width, height, true);
 	}
 
@@ -101,8 +97,6 @@ public class MenuScreen extends AbstractGameScreen {
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -117,13 +111,11 @@ public class MenuScreen extends AbstractGameScreen {
 		skinLibgdx = new Skin
 				(Gdx.files.internal(Constants.SKIN_LIBGDX_UI),
 						new TextureAtlas(Constants.TEXTURE_ATLAS_LIBGDX_UI));		
-		// build all layers
 		Table layerBackground = buildBackgroundLayer();
 		Table layerObjects = buildObjectsLayer();
 		Table layerLogos = buildLogosLayer();
 		Table layerControls = buildControlsLayer();
 		Table layerOptionsWindow = buildOptionsWindowLayer();
-		// assemble stage for menu screen
 		stage.clear();
 		Stack stack = new Stack();
 		stage.addActor(stack);
@@ -160,11 +152,9 @@ public class MenuScreen extends AbstractGameScreen {
 	private Table buildLogosLayer () {
 		Table layer = new Table();
 		layer.left().top();
-		// + Game Logo
 		imgLogo = new Image(skinCanyonBunny, "logo");
 		layer.add(imgLogo);
 		layer.row().expandY();
-		// + Info Logos
 		imgInfo = new Image(skinCanyonBunny, "info");
 		layer.add(imgInfo).bottom();
 		if (debugEnabled) layer.debug();
@@ -174,7 +164,6 @@ public class MenuScreen extends AbstractGameScreen {
 	private Table buildControlsLayer () {
 		Table layer = new Table();
 		layer.right().bottom();
-		// + Play Button
 		btnMenuPlay = new Button(skinCanyonBunny, "play");
 		layer.add(btnMenuPlay);
 		btnMenuPlay.addListener(new ChangeListener() {
@@ -184,7 +173,6 @@ public class MenuScreen extends AbstractGameScreen {
 			}
 		});
 		layer.row();
-		// + Options Button
 		btnMenuOptions = new Button(skinCanyonBunny, "options");
 		layer.add(btnMenuOptions);
 		btnMenuOptions.addListener(new ChangeListener() {
@@ -211,22 +199,14 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildOptionsWindowLayer () {
 		winOptions = new Window("Options", skinLibgdx);
-		// + Audio Settings: Sound/Music CheckBox and Volume Slider
 		winOptions.add(buildOptWinAudioSettings()).row();
-		// + Character Skin: Selection Box (White, Gray, Brown)
 		winOptions.add(buildOptWinSkinSelection()).row();
-		// + Debug: Show FPS Counter
 		winOptions.add(buildOptWinDebug()).row();
-		// + Separator and Buttons (Save, Cancel)
 		winOptions.add(buildOptWinButtons()).pad(10, 0, 10, 0);
-		// Make options window slightly transparent
 		winOptions.setColor(1, 1, 1, 0.8f);
-		// Hide options window by default
 		winOptions.setVisible(false);
 		if (debugEnabled) winOptions.debug();
-		// Let TableLayout recalculate widget sizes and positions
 		winOptions.pack();
-		// Move options window to bottom right corner
 		winOptions.setPosition
 		(Constants.VIEWPORT_GUI_WIDTH - winOptions.getWidth() - 50,
 				50);
@@ -264,31 +244,31 @@ public class MenuScreen extends AbstractGameScreen {
 	private void onSaveClicked() {
 		saveSettings();
 		onCancelClicked();
+		AudioManager.instance.onSettingsUpdated();
+
 	}
 
 	private void onCancelClicked() {
 		btnMenuPlay.setVisible(true);
 		btnMenuOptions.setVisible(true);
 		winOptions.setVisible(false);
+		AudioManager.instance.onSettingsUpdated();
 	}
 
 	private Table buildOptWinAudioSettings () {
 		Table tbl = new Table();
-		// + Title: "Audio"
 		tbl.pad(10, 10, 0, 10);
 		tbl.add(new Label("Audio", skinLibgdx, "default-font",
 				Color.ORANGE)).colspan(3);
 		tbl.row();
 		tbl.columnDefaults(0).padRight(10);
 		tbl.columnDefaults(1).padRight(10);
-		// + Checkbox, "Sound" label, sound volume slider
 		chkSound = new CheckBox("", skinLibgdx);
 		tbl.add(chkSound);
 		tbl.add(new Label("Sound", skinLibgdx));
 		sldSound = new Slider(0.0f, 1.0f, 0.1f, false, skinLibgdx);
 		tbl.add(sldSound);
 		tbl.row();
-		// + Checkbox, "Music" label, music volume slider
 		chkMusic = new CheckBox("", skinLibgdx);
 		tbl.add(chkMusic);
 		tbl.add(new Label("Music", skinLibgdx));
@@ -301,12 +281,10 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildOptWinSkinSelection () {
 		Table tbl = new Table();
-		// + Title: "Character Skin"
 		tbl.pad(10, 10, 0, 10);
 		tbl.add(new Label("Character Skin", skinLibgdx,
 				"default-font", Color.ORANGE)).colspan(2);
 		tbl.row();
-		// + Drop down box filled with skin items
 		selCharSkin = new SelectBox<CharacterSkin>(skinLibgdx);
 		selCharSkin.setItems(CharacterSkin.values());
 		selCharSkin.addListener(new ChangeListener() {
@@ -317,7 +295,6 @@ public class MenuScreen extends AbstractGameScreen {
 			}
 		});
 		tbl.add(selCharSkin).width(120).padRight(20);
-		// + Skin preview image
 		imgCharSkin = new Image(Assets.instance.bunny.head);
 		tbl.add(imgCharSkin).width(50).height(50);
 
@@ -326,14 +303,12 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildOptWinDebug () {
 		Table tbl = new Table();
-		// + Title: "Debug"
 		tbl.pad(10, 10, 0, 10);
 		tbl.add(new Label("Debug", skinLibgdx, "default-font",
 				Color.RED)).colspan(3);
 		tbl.row();
 		tbl.columnDefaults(0).padRight(10);
 		tbl.columnDefaults(1).padRight(10);
-		// + Checkbox, "Show FPS Counter" label
 		chkShowFpsCounter = new CheckBox("", skinLibgdx);
 		tbl.add(new Label("Show FPS Counter", skinLibgdx));
 		tbl.add(chkShowFpsCounter);
@@ -344,7 +319,6 @@ public class MenuScreen extends AbstractGameScreen {
 
 	private Table buildOptWinButtons () {
 		Table tbl = new Table();
-		// + Separator
 		Label lbl = null;
 		lbl = new Label("", skinLibgdx);
 		lbl.setColor(0.75f, 0.75f, 0.75f, 1);
@@ -358,7 +332,6 @@ public class MenuScreen extends AbstractGameScreen {
 		lbl.getStyle().background = skinLibgdx.newDrawable("white");
 		tbl.add(lbl).colspan(2).height(1).width(220).pad(0, 1, 5, 0);
 		tbl.row();
-		// + Save Button with event handler
 		btnWinOptSave = new TextButton("Save", skinLibgdx);
 		tbl.add(btnWinOptSave).padRight(30);
 		btnWinOptSave.addListener(new ChangeListener() {
@@ -367,7 +340,6 @@ public class MenuScreen extends AbstractGameScreen {
 				onSaveClicked();
 			}
 		});
-		// + Cancel Button with event handler
 		btnWinOptCancel = new TextButton("Cancel", skinLibgdx);
 		tbl.add(btnWinOptCancel);
 		btnWinOptCancel.addListener(new ChangeListener() {

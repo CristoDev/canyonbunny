@@ -8,6 +8,8 @@ import com.packtpub.canyonbunny.game.Assets;
 import com.packtpub.canyonbunny.util.Constants;
 import com.packtpub.canyonbunny.util.CharacterSkin;
 import com.packtpub.canyonbunny.util.GamePreferences;
+import com.badlogic.gdx.math.MathUtils;
+import com.packtpub.canyonbunny.util.AudioManager;
 
 public class BunnyHead extends AbstractGameObject {
 	public static final String TAG = BunnyHead.class.getName();
@@ -45,7 +47,6 @@ public class BunnyHead extends AbstractGameObject {
 		viewDirection = VIEW_DIRECTION.RIGHT;
 		jumpState = JUMP_STATE.FALLING;
 		timeJumping = 0;
-		// Particles
 		dustParticles.load(Gdx.files.internal("particles/dust.pfx"), Gdx.files.internal("particles"));
 	}
 	
@@ -64,7 +65,6 @@ public class BunnyHead extends AbstractGameObject {
 	@Override
 	public void render (SpriteBatch batch) {
 		TextureRegion reg = null;		
-		// Draw Particles
 		dustParticles.draw(batch);		
 		batch.setColor(
 		CharacterSkin.values()[GamePreferences.instance.charSkin].getColor());
@@ -136,6 +136,7 @@ public class BunnyHead extends AbstractGameObject {
 			if (jumpKeyPressed) {
 				timeJumping = 0;
 				jumpState = JUMP_STATE.JUMP_RISING;
+				AudioManager.instance.play(Assets.instance.sounds.jump);
 			}
 			break;
 		case JUMP_RISING:
@@ -147,6 +148,9 @@ public class BunnyHead extends AbstractGameObject {
 			if (jumpKeyPressed && hasFeatherPowerup) {
 				timeJumping = JUMP_TIME_OFFSET_FLYING;
 				jumpState = JUMP_STATE.JUMP_RISING;
+				AudioManager.instance.play(
+						Assets.instance.sounds.jumpWithFeather, 1,
+						MathUtils.random(1.0f, 1.1f));				
 			}
 			break;
 		}	

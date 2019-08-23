@@ -15,7 +15,6 @@ public class GamePreferences {
 	public boolean showFpsCounter;
 	private Preferences prefs;
 
-	// singleton: prevent instantiation from other classes
 	private GamePreferences () {
 		prefs = Gdx.app.getPreferences(Constants.PREFERENCES);
 	}

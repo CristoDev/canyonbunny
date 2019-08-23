@@ -20,6 +20,7 @@ import com.packtpub.canyonbunny.screens.DirectedGame;
 import com.badlogic.gdx.math.Interpolation;
 import com.packtpub.canyonbunny.screens.transitions.ScreenTransition;
 import com.packtpub.canyonbunny.screens.transitions.ScreenTransitionSlide;
+import com.packtpub.canyonbunny.util.AudioManager;
 
 public class WorldController extends InputAdapter {
 	private static final String TAG =CanyonBunnyMain.class.getName();
@@ -47,7 +48,6 @@ public class WorldController extends InputAdapter {
 	}
 
 	private void backToMenu () {
-		// switch to menu screen
 		ScreenTransition transition = ScreenTransitionSlide.init(0.75f,ScreenTransitionSlide.DOWN, 
 				false, Interpolation.bounceOut);
 		game.setScreen(new MenuScreen(game), transition);
@@ -80,6 +80,7 @@ public class WorldController extends InputAdapter {
 		testCollisions();
 		cameraHelper.update(deltaTime);
 		if (!isGameOver() &&isPlayerInWater()) {
+			AudioManager.instance.play(Assets.instance.sounds.liveLost);
 			lives--;
 			if (isGameOver())
 				timeLeftGameOverDelay = Constants.TIME_DELAY_GAME_OVER;
@@ -234,6 +235,7 @@ public class WorldController extends InputAdapter {
 	private void onCollisionBunnyWithGoldCoin (GoldCoin goldcoin) {
 		goldcoin.collected = true;
 		score += goldcoin.getScore();
+		AudioManager.instance.play(Assets.instance.sounds.pickupCoin);
 		Gdx.app.log(TAG, "Gold coin collected");
 	}
 
@@ -241,6 +243,7 @@ public class WorldController extends InputAdapter {
 		feather.collected = true;
 		score += feather.getScore();
 		level.bunnyHead.setFeatherPowerup(true);
+		AudioManager.instance.play(Assets.instance.sounds.pickupFeather);
 		Gdx.app.log(TAG, "Feather collected");
 	}
 
@@ -251,5 +254,4 @@ public class WorldController extends InputAdapter {
 	public boolean isPlayerInWater () {
 		return level.bunnyHead.position.y < -5;
 	}	
-
 }

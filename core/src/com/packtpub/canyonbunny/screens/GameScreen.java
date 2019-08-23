@@ -18,12 +18,9 @@ public class GameScreen extends AbstractGameScreen {
 
 	@Override
 	public void render (float deltaTime) {
-		if (!paused) { // Do not update game world when paused.
-			// Update game world by the time that has passed
-			// since last rendered frame.
+		if (!paused) { 
 			worldController.update(deltaTime);
 		}
-		// Sets the clear screen color to: Cornflower Blue
 		Gdx.gl.glClearColor(0x64 / 255.0f, 0x95 / 255.0f,0xed /
 				255.0f, 0xff / 255.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

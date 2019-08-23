@@ -39,7 +39,6 @@ public class ScreenTransitionSlide implements ScreenTransition {
 		float x = 0;
 		float y = 0;
 		if (easing != null) alpha = easing.apply(alpha);
-		// calculate position offset
 		switch (direction) {
 		case LEFT:
 			x = -w * alpha;
@@ -58,10 +57,8 @@ public class ScreenTransitionSlide implements ScreenTransition {
 			if (!slideOut) y += h;
 			break;
 		}
-		// drawing order depends on slide type ('in' or 'out')
 		Texture texBottom = slideOut ? nextScreen : currScreen;
 		Texture texTop = slideOut ? currScreen : nextScreen;
-		// finally, draw both screens
 		Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();

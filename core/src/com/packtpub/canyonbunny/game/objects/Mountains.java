@@ -34,13 +34,11 @@ public class Mountains extends AbstractGameObject {
 		batch.setColor(tintColor, tintColor, tintColor, 1);
 		float xRel = dimension.x * offsetX;
 		float yRel = dimension.y * offsetY;
-		// mountains span the whole level
 		int mountainLength = 0;
 		mountainLength += MathUtils.ceil(
 				length / (2 * dimension.x) * (1 - parallaxSpeedX));
 		mountainLength += MathUtils.ceil(0.5f + offsetX);
 		for (int i = 0; i<mountainLength; i++) {
-			// mountain left
 			reg = regMountainLeft;
 			batch.draw(reg.getTexture(),
 					origin.x + xRel + position.x * parallaxSpeedX,
@@ -53,7 +51,6 @@ public class Mountains extends AbstractGameObject {
 					reg.getRegionWidth(), reg.getRegionHeight(),
 					false, false);
 			xRel += dimension.x;
-			// mountain right
 			reg = regMountainRight;
 			batch.draw(reg.getTexture(),
 					origin.x + xRel + position.x * parallaxSpeedX,
@@ -67,7 +64,6 @@ public class Mountains extends AbstractGameObject {
 					false, false);
 			xRel += dimension.x;
 		}
-		// reset color to white
 		batch.setColor(1, 1, 1, 1);
 	}
 	
