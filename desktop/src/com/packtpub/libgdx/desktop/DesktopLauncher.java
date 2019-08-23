@@ -1,4 +1,4 @@
-package com.packtpub.libgdx.canyonbunny.desktop;
+package com.packtpub.libgdx.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -16,16 +16,16 @@ public class DesktopLauncher {
 
 		// pour creer le pack il faut supprimer d'abord les fichiers .pack et
 		// .png s'ils existent sinon il y a une erreur
+		/*
 		if (rebuildAtlas) {
-			/*
 			Settings settings = new Settings();
 			settings.maxWidth = 1024;
 			settings.maxHeight = 1024;
 			settings.duplicatePadding = false;
 			settings.debug = drawDebugOutline;
 			TexturePacker.process(settings, "assets-raw/images", "../android/assets/images", "canyonbunny.pack");
-			 */
 		}
+		*/
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
