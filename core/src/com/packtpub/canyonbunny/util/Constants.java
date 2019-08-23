@@ -1,4 +1,4 @@
-package com.packtpub.libgdx.canyonbunny.util;
+package com.packtpub.canyonbunny.util;
 
 /**
  * classe pour la gestion des constantes dans le jeu
@@ -28,4 +28,11 @@ public class Constants {
 	
 	// GUI Height
 	public static final float VIEWPORT_GUI_HEIGHT = 480.0f;
+
+	// Duration of feather power-up in seconds
+	public static final float ITEM_FEATHER_POWERUP_DURATION = 9;
+	
+	// Delay after game over
+	public static final float TIME_DELAY_GAME_OVER = 3;
 }
+

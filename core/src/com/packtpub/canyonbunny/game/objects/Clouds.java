@@ -1,4 +1,4 @@
-package com.packtpub.libgdx.canyonbunny.game.objects;
+package com.packtpub.canyonbunny.game.objects;
 
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -6,14 +6,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.packtpub.libgdx.canyonbunny.game.Assets;
+import com.packtpub.canyonbunny.game.Assets;
 
 public class Clouds extends AbstractGameObject {
 	private float length;
 	private Array<TextureRegion> regClouds;
 	private Array<Cloud> clouds;
 	
-	// classe privee pour definir un nuage
 	private class Cloud extends AbstractGameObject {
 		private TextureRegion regCloud;
 		
@@ -33,8 +32,6 @@ public class Clouds extends AbstractGameObject {
 					false, false);
 		}
 	}
-	// fin de la classe privee
-	
 	
 	public Clouds (float length) {
 		this.length = length;
@@ -60,14 +57,12 @@ public class Clouds extends AbstractGameObject {
 	private Cloud spawnCloud () {
 		Cloud cloud = new Cloud();
 		cloud.dimension.set(dimension);
-		// select random cloud image
 		cloud.setRegion(regClouds.random());
-		// position
 		Vector2 pos = new Vector2();
-		pos.x = length + 10; // position after end of level
-		pos.y += 1.75; // base position
+		pos.x = length + 10;
+		pos.y += 1.75;
 		pos.y += MathUtils.random(0.0f, 0.2f)
-				* (MathUtils.randomBoolean() ? 1 : -1); // random additional position
+				* (MathUtils.randomBoolean() ? 1 : -1);
 		cloud.position.set(pos);
 		return cloud;
 	}
@@ -77,5 +72,4 @@ public class Clouds extends AbstractGameObject {
 		for (Cloud cloud : clouds)
 			cloud.render(batch);
 	}
-
 }

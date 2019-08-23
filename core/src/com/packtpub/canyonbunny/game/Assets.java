@@ -1,4 +1,4 @@
-package com.packtpub.libgdx.canyonbunny.game;
+package com.packtpub.canyonbunny.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
@@ -10,14 +10,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Disposable;
-import com.packtpub.libgdx.canyonbunny.util.Constants;
+import com.packtpub.canyonbunny.util.Constants;
 
 public class Assets implements Disposable, AssetErrorListener {
 	public static final String TAG = Assets.class.getName();
 	public static final Assets instance = new Assets();
+	public AssetFonts fonts;
 	private AssetManager assetManager;
 
-	// singleton: prevent instantiation from other classes
 	private Assets () {}
 
 	public AssetBunny bunny;
@@ -28,11 +28,8 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	public void init (AssetManager assetManager) {
 		this.assetManager = assetManager;
-		// set asset manager error handler
 		assetManager.setErrorListener(this);
-		// load texture atlas
 		assetManager.load(Constants.TEXTURE_ATLAS_OBJECTS, TextureAtlas.class);
-		// start loading assets and wait until finished
 		assetManager.finishLoading();
 		Gdx.app.debug(TAG, "# of assets loaded: " + assetManager.getAssetNames().size);
 		for (String a : assetManager.getAssetNames()) {
@@ -40,7 +37,6 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 
 		TextureAtlas atlas = assetManager.get(Constants.TEXTURE_ATLAS_OBJECTS);
-		// enable texture filtering for pixel smoothing
 		for (Texture t : atlas.getTextures()) {
 			t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		}
@@ -76,8 +72,6 @@ public class Assets implements Disposable, AssetErrorListener {
 	 * 
 	 * AssetBunny asset=new AssetBunny(atlas);
 	 * asset.head -> AtlasRegion (qui etend TextureRegion)
-	 * 
-	 * 
 	 */
 	public class AssetBunny {
 		public final AtlasRegion head;
@@ -130,27 +124,21 @@ public class Assets implements Disposable, AssetErrorListener {
 			waterOverlay = atlas.findRegion("water_overlay");
 		}
 	}
-
-
-	public AssetFonts fonts;
 	
 	public class AssetFonts {
 		public final BitmapFont defaultSmall;
 		public final BitmapFont defaultNormal;
 		public final BitmapFont defaultBig;
 		public AssetFonts () {
-			// create three fonts using Libgdx's 15px bitmap font
 			defaultSmall = new BitmapFont(
 					Gdx.files.internal("images/arial-15.fnt"), true);
 			defaultNormal = new BitmapFont(
 					Gdx.files.internal("images/arial-15.fnt"), true);
 			defaultBig = new BitmapFont(
 					Gdx.files.internal("images/arial-15.fnt"), true);
-			// set font sizes
 			defaultSmall.setScale(0.75f);
 			defaultNormal.setScale(1.0f);
 			defaultBig.setScale(2.0f);
-			// enable linear texture filtering for smooth fonts
 			defaultSmall.getRegion().getTexture().setFilter(
 					TextureFilter.Linear, TextureFilter.Linear);
 			defaultNormal.getRegion().getTexture().setFilter(
